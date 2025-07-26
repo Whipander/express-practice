@@ -38,10 +38,17 @@ app.get("/characters/:id", (req, res) => {
     try {
       const characters = JSON.parse(data).characters;
       const id = parseInt(req.params.id);
+      isFound = false;
       for (const character of characters) {
         if (character.id === id) {
           res.json(character);
+          isFound = true;
         }
+      }
+      if (!isFound) {
+        res
+          .status(400)
+          .json({ error: `Could not find the character with the id: ${id}` });
       }
     } catch (parsErr) {
       res
