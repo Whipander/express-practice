@@ -29,31 +29,18 @@ app.get("/characters", (req, res) => {
 });
 
 app.get("/characters/:id", (req, res) => {
-  fs.readFile(userJSONFilePath, "utf-8", (err, data) => {
-    if (err) {
-      res.status(500).json({ error: `Error reading ${userJSONFilePath} file` });
+  const id = parseInt(req.params.id);
+  const charactersList = charactersData.characters;
+  let found = false;
+  for (const character of charactersList) {
+    if (character.id === id) {
+      found = true;
+      res.json(character);
     }
-    try {
-      const characters = JSON.parse(data).characters;
-      const id = parseInt(req.params.id);
-      isFound = false;
-      for (const character of characters) {
-        if (character.id === id) {
-          res.json(character);
-          isFound = true;
-        }
-      }
-      if (!isFound) {
-        res
-          .status(400)
-          .json({ error: `Could not find the character with the id: ${id}` });
-      }
-    } catch (parsErr) {
-      res
-        .status(500)
-        .json({ error: `Error parsing ${userJSONFilePath} file ` });
-    }
-  });
+  }
+  if (!found) {
+    res.status(400).json({ error: `Could not find character with id: ${id}` });
+  }
 });
 
 app.listen(port, () => {
