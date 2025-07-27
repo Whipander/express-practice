@@ -5,6 +5,14 @@ const path = require("path");
 const app = express();
 const port = 3000;
 const userJSONFilePath = path.join(__dirname, "user.json");
+let charactersData;
+
+try {
+  const fileContent = fs.readFileSync(userJSONFilePath, "utf-8");
+  charactersData = JSON.parse(fileContent);
+} catch (error) {
+  console.error("Error loading characters data:", error);
+}
 
 // GET /characters ==> Get all characters
 // POST /characters ==> Create a new character
@@ -15,19 +23,9 @@ const userJSONFilePath = path.join(__dirname, "user.json");
 app.use(express.json());
 
 app.get("/characters", (req, res) => {
-  fs.readFile(userJSONFilePath, "utf-8", (err, data) => {
-    if (err) {
-      res.status(500).json({ error: `Error reading ${userJSONFilePath} file` });
-    }
-    try {
-      const characters = JSON.parse(data);
-      res.json(characters);
-    } catch (parsErr) {
-      res
-        .status(500)
-        .json({ error: `Error parsing ${userJSONFilePath} file ` });
-    }
-  });
+  if (charactersData) {
+    res.json(charactersData);
+  }
 });
 
 app.get("/characters/:id", (req, res) => {
