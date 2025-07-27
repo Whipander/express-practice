@@ -70,32 +70,54 @@ app.get("/characters/:id", (req, res) => {
   }
 });
 
-app.post("/characters", (req, res) => {
-  try {
-    const charactersToAdd = Array.isArray(req.body) ? req.body : [req.body];
-    let invalidCharacters = [];
-    if (charactersToAdd !== null) {
-      for (const character of charactersToAdd) {
-        if (hasAllRequiredFields(character)) charactersList.push(character);
-        else {
-          invalidCharacters.push(character);
-        }
-      }
-    } else {
-      res.status(400).json({ error: "Characters not provided" });
-    }
-
-    if (invalidCharacters.length > 0) {
+// Input validation middleware
+function validateCharacter(req, res, next) {
+  const character = req.body;
+  if (!character || Object.keys(character).length === 0) {
+    return res.status(400).json({ error: "Request body is required" });
+  }
+  if (Array.isArray(character)) {
+    const invalidChars = character.filter(
+      (char) => !hasAllRequiredFields(char)
+    );
+    if (invalidChars.length > 0) {
       return res.status(400).json({
         error: "Some characters are missing required fields",
-        invalidCharacters,
+        invalidCharacters: invalidChars,
+        requiredFields,
       });
     }
+  }
+  else if (!hasAllRequiredFields(character)) {
+    return res.status(400).json({
+      error: "Missing required fields",
+      requiredFields,
+      received: Object.keys(character),
+    });
+  }
+  next();
+}
 
+app.post("/characters", validateCharacter, (req, res) => {
+  try {
+    const charactersToAdd = Array.isArray(req.body) ? req.body : [req.body];
+    const addedCharacters = [];
+
+    for (const character of charactersToAdd) {
+      // Check for duplicate ID
+      const duplicate = charactersList.some((char) => char.id === character.id);
+      if (duplicate) {
+        return res.status(409).json({
+          error: `Character with id ${character.id} already exists`,
+          characterId: character.id,
+        });
+      }
+      charactersList.push(character);
+      addedCharacters.push(character);
+    }
     charactersData.characters = charactersList;
-
-    fs.writeFileSync(userJSONFilePath, JSON.stringify(charactersData));
-    res.status(201).json(charactersToAdd);
+    fs.writeFileSync(userJSONFilePath, JSON.stringify(charactersData, null, 2));
+    res.status(201).json(addedCharacters);
   } catch (error) {
     console.error("Error adding character:", error);
     res.status(500).json({ error: "Failed to add character" });
