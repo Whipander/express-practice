@@ -10,14 +10,10 @@ let charactersData = { characters: [] };
 let charactersList = [];
 
 function hasAllRequiredFields(character) {
-  for (const field of requiredFields) {
-    if (!(field in character)) {
-      return false;
-    }
-  }
-  return true;
+  return requiredFields.every((field) => field in character);
 }
 
+// Read what is inside of the user.json file
 try {
   if (fs.existsSync(userJSONFilePath)) {
     const fileContent = fs.readFileSync(userJSONFilePath, "utf-8");
@@ -50,6 +46,33 @@ try {
 
 app.use(express.json());
 
+// Input validation middleware
+function validateCharacter(req, res, next) {
+  const character = req.body;
+  if (!character || Object.keys(character).length === 0) {
+    return res.status(400).json({ error: "Request body is required" });
+  }
+  if (Array.isArray(character)) {
+    const invalidChars = character.filter(
+      (char) => !hasAllRequiredFields(char)
+    );
+    if (invalidChars.length > 0) {
+      return res.status(400).json({
+        error: "Some characters are missing required fields",
+        invalidCharacters: invalidChars,
+        requiredFields,
+      });
+    }
+  } else if (!hasAllRequiredFields(character)) {
+    return res.status(400).json({
+      error: "Missing required fields",
+      requiredFields,
+      received: Object.keys(character),
+    });
+  }
+  next();
+}
+
 app.get("/characters", (req, res) => {
   if (charactersData) {
     res.json(charactersData);
@@ -69,34 +92,6 @@ app.get("/characters/:id", (req, res) => {
     res.status(400).json({ error: `Could not find character with id: ${id}` });
   }
 });
-
-// Input validation middleware
-function validateCharacter(req, res, next) {
-  const character = req.body;
-  if (!character || Object.keys(character).length === 0) {
-    return res.status(400).json({ error: "Request body is required" });
-  }
-  if (Array.isArray(character)) {
-    const invalidChars = character.filter(
-      (char) => !hasAllRequiredFields(char)
-    );
-    if (invalidChars.length > 0) {
-      return res.status(400).json({
-        error: "Some characters are missing required fields",
-        invalidCharacters: invalidChars,
-        requiredFields,
-      });
-    }
-  }
-  else if (!hasAllRequiredFields(character)) {
-    return res.status(400).json({
-      error: "Missing required fields",
-      requiredFields,
-      received: Object.keys(character),
-    });
-  }
-  next();
-}
 
 app.post("/characters", validateCharacter, (req, res) => {
   try {
@@ -121,6 +116,35 @@ app.post("/characters", validateCharacter, (req, res) => {
   } catch (error) {
     console.error("Error adding character:", error);
     res.status(500).json({ error: "Failed to add character" });
+  }
+});
+
+app.delete("/characters/:id", (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const characterIndex = charactersList.findIndex((char) => char.id === id);
+
+    if (characterIndex === -1) {
+      res
+        .status(404)
+        .json({ error: `Could not find a character with the id : ${id}` });
+    }
+    const [deletedCharacter] = charactersList.splice(characterIndex, 1);
+
+    charactersData.characters = charactersList;
+
+    fs.writeFileSync(userJSONFilePath, JSON.stringify(charactersData, null, 2));
+
+    res.status(200).json({
+      message: `Character with id ${id} deleted successfully`,
+      deletedCharacter,
+    });
+  } catch (error) {
+    console.error("Error deleting character:", error);
+    res.status(500).json({
+      error: "Failed to delete character",
+      details: error.message,
+    });
   }
 });
 

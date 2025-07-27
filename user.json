@@ -47,12 +47,6 @@
       "name": "Hulk",
       "realName": "Bruce Banner",
       "universe": "Earth-616"
-    },
-    {
-      "id": 13,
-      "name": "Test 4",
-      "realName": "Test User 4",
-      "universe": "Test Universe"
     }
   ]
 }
