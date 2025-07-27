@@ -2,7 +2,7 @@
   "characters": [
     {
       "id": 1,
-      "name": "Spider-Man",
+      "name": "Spidey",
       "realName": "Peter Parker",
       "universe": "Earth-616"
     },
@@ -40,12 +40,6 @@
       "id": 7,
       "name": "Scarlet Witch",
       "realName": "Wanda Maximoff",
-      "universe": "Earth-616"
-    },
-    {
-      "id": 8,
-      "name": "Hulk",
-      "realName": "Bruce Banner",
       "universe": "Earth-616"
     }
   ]

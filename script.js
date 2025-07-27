@@ -6,6 +6,12 @@ const app = express();
 const port = 3000;
 const userJSONFilePath = path.join(__dirname, "user.json");
 const requiredFields = ["id", "name", "realName", "universe"];
+const fieldTypes = {
+  id: "number",
+  name: "string",
+  realName: "string",
+  universe: "string",
+};
 let charactersData = { characters: [] };
 let charactersList = [];
 
@@ -70,6 +76,57 @@ function validateCharacter(req, res, next) {
       received: Object.keys(character),
     });
   }
+  next();
+}
+
+// Validation middleware for updates (doesn't require ID)
+function validateCharacterUpdate(req, res, next) {
+  const character = req.body;
+
+  if (!character || Object.keys(character).length === 0) {
+    return res.status(400).json({ error: "Request body is required" });
+  }
+
+  const invalidFields = [];
+  for (const [field, value] of Object.entries(character)) {
+    if (!(field in fieldTypes)) {
+      invalidFields.push({
+        field,
+        error: "Unexpected field",
+      });
+      continue;
+    }
+
+    const expectedType = fieldTypes[field];
+    const actualType = typeof value;
+
+    if (
+      expectedType === "number" &&
+      (isNaN(value) || actualType !== "number")
+    ) {
+      invalidFields.push({
+        field,
+        expected: "number",
+        received: actualType,
+        value,
+      });
+    } else if (expectedType === "string" && actualType !== "string") {
+      invalidFields.push({
+        field,
+        expected: "string",
+        received: actualType,
+        value,
+      });
+    }
+  }
+
+  if (invalidFields.length > 0) {
+    return res.status(400).json({
+      error: "Validation failed",
+      invalidFields,
+    });
+  }
+
   next();
 }
 
@@ -143,6 +200,42 @@ app.delete("/characters/:id", (req, res) => {
     console.error("Error deleting character:", error);
     res.status(500).json({
       error: "Failed to delete character",
+      details: error.message,
+    });
+  }
+});
+
+app.put("/characters/:id", validateCharacterUpdate, (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const updatedData = req.body;
+
+    const characterIndex = charactersList.findIndex((char) => char.id === id);
+
+    if (characterIndex === -1) {
+      return res.status(404).json({
+        error: `Character with id ${id} not found`,
+      });
+    }
+
+    const updatedCharacter = {
+      ...charactersList[characterIndex],
+      ...updatedData,
+      id: id, // Ensure ID remains the same
+    };
+
+    charactersList[characterIndex] = updatedCharacter;
+    charactersData.characters = charactersList;
+    fs.writeFileSync(userJSONFilePath, JSON.stringify(charactersData, null, 2));
+
+    res.status(200).json({
+      message: `Character with id ${id} updated successfully`,
+      updatedCharacter,
+    });
+  } catch (error) {
+    console.error("Error updating character:", error);
+    res.status(500).json({
+      error: "Failed to update character",
       details: error.message,
     });
   }
