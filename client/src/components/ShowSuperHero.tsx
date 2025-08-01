@@ -34,7 +34,7 @@ const ShowSuperHero = () => {
 
   return (
     <>
-      <div>
+      <div className="max-w-9/12 mx-auto flex flex-wrap justify-center gap-5">
         {characters.map((el: SuperHero) => {
           return (
             <SuperHeroCard
