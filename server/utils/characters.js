@@ -1,13 +1,16 @@
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const userJSONFilePath = path.join(__dirname, "user.json");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const userJSONFilePath = path.join(__dirname, "..", "/data/user.json");
 
 let charactersData = { characters: [] };
 let charactersList = [];
 
 // Read what is inside of the user.json file
-const loadCharacters = () => {
+export const loadCharacters = () => {
   try {
     if (fs.existsSync(userJSONFilePath)) {
       const fileContent = fs.readFileSync(userJSONFilePath, "utf-8");
@@ -36,7 +39,7 @@ const loadCharacters = () => {
   }
 };
 
-const saveCharacters = () => {
+export const saveCharacters = () => {
   try {
     charactersData.characters = charactersList;
     fs.writeFileSync(userJSONFilePath, JSON.stringify(charactersData, null, 2));
@@ -45,18 +48,20 @@ const saveCharacters = () => {
   }
 };
 
-const getCharacters = () => charactersData;
+export const getCharacters = () => charactersData;
 
-const getCharacterById = (id) => {
+export const getCharacterById = (id) => {
   return charactersList.find((character) => character.id === id);
 };
 
-const addCharacters = (charactersToAdd) => {
+export const addCharacters = (charactersToAdd) => {
   const addedCharacters = [];
   for (const character of charactersToAdd) {
     const duplicate = charactersList.some((char) => char.id === character.id);
     if (duplicate) {
-      const error = new Error(`Character with id ${character.id} already exists`);
+      const error = new Error(
+        `Character with id ${character.id} already exists`
+      );
       error.status = 409;
       throw error;
     }
@@ -67,7 +72,7 @@ const addCharacters = (charactersToAdd) => {
   return addedCharacters;
 };
 
-const deleteCharacterById = (id) => {
+export const deleteCharacterById = (id) => {
   const characterIndex = charactersList.findIndex((char) => char.id === id);
   if (characterIndex === -1) {
     return null;
@@ -77,7 +82,7 @@ const deleteCharacterById = (id) => {
   return deletedCharacter;
 };
 
-const updateCharacterById = (id, updatedData) => {
+export const updateCharacterById = (id, updatedData) => {
   const characterIndex = charactersList.findIndex((char) => char.id === id);
   if (characterIndex === -1) {
     return null;
@@ -92,13 +97,4 @@ const updateCharacterById = (id, updatedData) => {
   charactersList[characterIndex] = updatedCharacter;
   saveCharacters();
   return updatedCharacter;
-};
-
-module.exports = {
-  loadCharacters,
-  getCharacters,
-  getCharacterById,
-  addCharacters,
-  deleteCharacterById,
-  updateCharacterById,
 };

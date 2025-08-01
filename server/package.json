@@ -2,5 +2,5 @@
   "dependencies": {
     "express": "^5.1.0"
   },
-  "type": "commonjs"
+  "type": "module"
 }

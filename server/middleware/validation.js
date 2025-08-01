@@ -6,7 +6,7 @@ const fieldTypes = {
   universe: "string",
 };
 
-function validateCharacter(req, res, next) {
+export function validateCharacter(req, res, next) {
   const character = req.body;
 
   if (!character || Object.keys(character).length === 0) {
@@ -84,7 +84,7 @@ function validateCharacter(req, res, next) {
   next();
 }
 
-function validateCharacterUpdate(req, res, next) {
+export function validateCharacterUpdate(req, res, next) {
   const character = req.body;
 
   if (!character || Object.keys(character).length === 0) {
@@ -134,4 +134,3 @@ function validateCharacterUpdate(req, res, next) {
   next();
 }
 
-module.exports = { validateCharacter, validateCharacterUpdate };

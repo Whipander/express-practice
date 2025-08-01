@@ -1,16 +1,17 @@
-const express = require("express");
-const router = express.Router();
-const {
+import express from "express";
+import {
   getCharacters,
   getCharacterById,
   addCharacters,
   deleteCharacterById,
   updateCharacterById,
-} = require("../utils/characters");
-const {
+} from "../utils/characters.js";
+import {
   validateCharacter,
   validateCharacterUpdate,
-} = require("../middleware/validation");
+} from "../middleware/validation.js";
+
+const router = express.Router();
 
 router.get("/", (req, res) => {
   const characters = getCharacters();
@@ -95,4 +96,4 @@ router.put("/:id", validateCharacterUpdate, (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
