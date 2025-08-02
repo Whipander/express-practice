@@ -9,7 +9,6 @@ const userJSONFilePath = path.join(__dirname, "..", "/data/user.json");
 let charactersData = { characters: [] };
 let charactersList = [];
 
-// Read what is inside of the user.json file
 export const loadCharacters = () => {
   try {
     if (fs.existsSync(userJSONFilePath)) {
@@ -56,20 +55,40 @@ export const getCharacterById = (id) => {
 
 export const addCharacters = (charactersToAdd) => {
   const addedCharacters = [];
-  for (const character of charactersToAdd) {
-    const duplicate = charactersList.some((char) => char.id === character.id);
-    if (duplicate) {
-      const error = new Error(
-        `Character with id ${character.id} already exists`
+
+  const charactersArray = Array.isArray(charactersToAdd)
+    ? charactersToAdd
+    : [charactersToAdd];
+
+  for (const character of charactersArray) {
+    const newCharacter = { ...character };
+
+    if (!newCharacter.id) {
+      const maxId = charactersList.reduce(
+        (max, char) => Math.max(max, char.id || 0),
+        0
       );
-      error.status = 409;
-      throw error;
+      newCharacter.id = maxId + 1;
+    } else {
+      const duplicate = charactersList.some(
+        (char) => char.id === newCharacter.id
+      );
+      if (duplicate) {
+        const error = new Error(
+          `Character with id ${newCharacter.id} already exists`
+        );
+        error.status = 409;
+        throw error;
+      }
     }
-    charactersList.push(character);
-    addedCharacters.push(character);
+
+    charactersList.push(newCharacter);
+    addedCharacters.push(newCharacter);
   }
+
   saveCharacters();
-  return addedCharacters;
+
+  return addedCharacters.length === 1 ? addedCharacters[0] : addedCharacters;
 };
 
 export const deleteCharacterById = (id) => {

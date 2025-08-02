@@ -32,17 +32,22 @@ router.get("/:id", (req, res) => {
 
 router.post("/", validateCharacter, (req, res) => {
   try {
-    const charactersToAdd = Array.isArray(req.body) ? req.body : [req.body];
-    const addedCharacters = addCharacters(charactersToAdd);
-    res.status(201).json(addedCharacters);
+    // Add the character (the function will handle both single and multiple additions)
+    const result = addCharacters(req.body);
+    
+    // Return the created character with 201 status
+    res.status(201).json(result);
   } catch (error) {
     if (error.status === 409) {
-      return res
-        .status(409)
-        .json({ error: error.message, characterId: req.body.id });
+      return res.status(409).json({ 
+        error: error.message,
+        characterId: req.body.id || 'unknown'
+      });
     }
     console.error("Error adding character:", error);
-    res.status(500).json({ error: "Failed to add character" });
+    res.status(500).json({ 
+      error: error.message || "Failed to add character" 
+    });
   }
 });
 

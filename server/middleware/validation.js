@@ -1,6 +1,5 @@
-const requiredFields = ["id", "name", "realName", "universe"];
+const requiredFields = ["name", "realName", "universe"];
 const fieldTypes = {
-  id: "number",
   name: "string",
   realName: "string",
   universe: "string",
