@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import type { SuperHero } from "./ShowSuperHero";
+import type { Character } from "./ShowCharacters";
 const DOG_API_URL = "https://dog.ceo/api/breeds/image/random";
 
-const SuperHeroCard = ({ id, name, realName, universe }: SuperHero) => {
+const CharacterCard = ({ id, name, realName, universe }: Character) => {
   const [dogImage, setDogImage] = useState<string>("");
   const [imgLoading, setImgLoading] = useState(true);
   const [imgError, setImgError] = useState(false);
@@ -25,7 +25,7 @@ const SuperHeroCard = ({ id, name, realName, universe }: SuperHero) => {
 
   return (
     <div className="flex flex-col justify-between bg-neutral-900 basis-[300px] p-5 rounded-2xl shadow-2xl text-gray-300 relative">
-      <p className="absolute top-2 right-5 bg-gray-300 text-neutral-900 px-2 rounded-full z-50">
+      <p className="absolute top-2 right-5 bg-gray-300 text-neutral-900 px-2 rounded-full z-10">
         #{String(id).padStart(3, "0")}
       </p>
       {imgLoading ? (
@@ -50,4 +50,4 @@ const SuperHeroCard = ({ id, name, realName, universe }: SuperHero) => {
   );
 };
 
-export default SuperHeroCard;
+export default CharacterCard;

@@ -1,1 +1,1 @@
-export { default as ShowSupperHero } from "./ShowSuperHero";
+export { default as ShowCharacters } from "./ShowCharacters";
