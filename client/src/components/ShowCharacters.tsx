@@ -29,6 +29,24 @@ const ShowCharacters = () => {
     setSelectedCharacter(null);
   };
 
+  const handleDelete = async (id: number) => {
+    try {
+      const response = await fetch(`http://localhost:3000/characters/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete character");
+      }
+
+      setCharacters((prevCharacters) =>
+        prevCharacters.filter((character) => character.id !== id)
+      );
+    } catch (error) {
+      console.error("Error deleting character:", error);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -80,6 +98,7 @@ const ShowCharacters = () => {
           return (
             <SuperHeroCard
               setEdit={() => handleEdit(el)}
+              onDelete={handleDelete}
               key={el.id}
               name={el.name}
               realName={el.realName}
