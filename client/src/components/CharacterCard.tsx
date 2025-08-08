@@ -1,12 +1,19 @@
-import { useEffect, useState } from "react";
-import type { Character } from "./ShowCharacters";
+import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 const DOG_API_URL = "https://dog.ceo/api/breeds/image/random";
 
-const CharacterCard = ({ id, name, realName, universe }: Character) => {
+type CharacterProps = {
+  id: number;
+  name: string;
+  realName: string;
+  universe: string;
+  setEdit:Dispatch<SetStateAction<boolean>>;
+ 
+};
+
+const CharacterCard = ({ id, name, realName, universe, setEdit}: CharacterProps) => {
   const [dogImage, setDogImage] = useState<string>("");
   const [imgLoading, setImgLoading] = useState(true);
   const [imgError, setImgError] = useState(false);
-
   useEffect(() => {
     const fetchDogImage = async () => {
       try {
@@ -24,7 +31,7 @@ const CharacterCard = ({ id, name, realName, universe }: Character) => {
   }, []);
 
   return (
-    <div className="flex flex-col justify-between bg-neutral-900 basis-[300px] p-5 rounded-2xl shadow-2xl text-gray-300 relative">
+    <div onClick={() => setEdit(true)} className="flex flex-col justify-between bg-neutral-900 basis-[300px] p-5 rounded-2xl shadow-2xs text-gray-300 relative hover:-translate-y-2 hover:shadow-2xl transition-all cursor-pointer">
       <p className="absolute top-2 right-5 bg-gray-300 text-neutral-900 px-2 rounded-full z-10">
         #{String(id).padStart(3, "0")}
       </p>
@@ -42,7 +49,7 @@ const CharacterCard = ({ id, name, realName, universe }: Character) => {
         />
       )}
       <div>
-        <h2 className="text-4xl">{name}</h2>
+        <h2 className="text-4xl mt-2">{name}</h2>
         <h3 className="text-gray-400">{realName}</h3>
       </div>
       <p className="mt-5">Universe: {universe}</p>

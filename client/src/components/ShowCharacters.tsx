@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import SuperHeroCard from "./CharacterCard";
 import CreateCharForm from "./CreateCharForm";
+import UpdateCharForm from "./UpdateCharForm";
 export type Character = {
   id: number;
   name: string;
@@ -12,8 +13,20 @@ const ShowCharacters = () => {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateCharacter, setShowCreateCharacter] = useState(false);
+  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
+    null
+  );
+
   const handleShowCreateCharacter = () => {
     setShowCreateCharacter(!showCreateCharacter);
+  };
+
+  const handleEdit = (character: Character) => {
+    setSelectedCharacter(character);
+  };
+
+  const handleCloseEdit = () => {
+    setSelectedCharacter(null);
   };
 
   useEffect(() => {
@@ -53,10 +66,20 @@ const ShowCharacters = () => {
           />
         </div>
       )}
+      {selectedCharacter && (
+        <div className="w-screen h-screen bg-black/80 fixed top-0 left-0 z-50">
+          <UpdateCharForm
+            onClose={handleCloseEdit}
+            setCharacterList={setCharacters}
+            character={selectedCharacter}
+          />
+        </div>
+      )}
       <div className="mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 justify-center gap-5">
         {characters.map((el: Character) => {
           return (
             <SuperHeroCard
+              setEdit={() => handleEdit(el)}
               key={el.id}
               name={el.name}
               realName={el.realName}
