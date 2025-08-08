@@ -21,10 +21,6 @@ const ShowCharacters = () => {
     setShowCreateCharacter(!showCreateCharacter);
   };
 
-  const handleEdit = (character: Character) => {
-    setSelectedCharacter(character);
-  };
-
   const handleCloseEdit = () => {
     setSelectedCharacter(null);
   };
@@ -51,19 +47,20 @@ const ShowCharacters = () => {
     const fetchData = async () => {
       try {
         const response = await fetch("http://localhost:3000/characters");
-        if (!response) {
+        if (!response.ok) {
           throw new Error("Could not fetch characters");
         }
         const data = await response.json();
         setCharacters(data.characters);
-        setLoading(false);
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
-  }, [characters]);
+  }, []); 
   if (loading) return <div>Loading...</div>;
 
   return (
@@ -97,7 +94,6 @@ const ShowCharacters = () => {
         {characters.map((el: Character) => {
           return (
             <SuperHeroCard
-              setEdit={() => handleEdit(el)}
               onDelete={handleDelete}
               key={el.id}
               name={el.name}
